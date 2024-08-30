@@ -19,7 +19,6 @@ app.include_router(trash.router)
 @app.middleware("http")
 def checkIPMiddleware(request: Request, call_next):
   host = request.client.host
-  print(host)
   if host not in allowed_ips:
     raise HTTPException(status_code=403, detail="Not allowed")
   return call_next(request)
