@@ -25,7 +25,7 @@ async def trashGet(userHash: str = Query(...),
 @router.post("/")
 async def trashPost(userHash: str = Query(...),
                     trashID: int = Form(...),
-                    lFiles: list[str] = Form(...),
+                    lFiles: list[str] = Form(None),
                     treePickle: str = Form(...)):
   sPath = os.path.join(BASE_PATH, userHash, USER_ROOT_PATH)
   sTrashPath = os.path.join(BASE_PATH, userHash, TRASH_PATH)
@@ -38,16 +38,12 @@ async def trashPost(userHash: str = Query(...),
     f.write(base64.b64decode(treePickle))
   
   with tarfile.open(os.path.join(sTrashPath, f"{trashID}.tar.gz"), "w:gz") as tar:
-    for file in lFiles:
-      if not os.path.exists(os.path.join(sPath, file)):
-        continue
-      tar.add(os.path.join(sPath, file), arcname=file)
-  
-  for file in lFiles:
-    print(os.path.join(sPath, file))
-    if not os.path.exists(os.path.join(sPath, file)):
-      continue
-    os.remove(os.path.join(sPath, file))
+    if lFiles:
+      for file in lFiles:
+        if not os.path.exists(os.path.join(sPath, file)):
+          continue
+        tar.add(os.path.join(sPath, file), arcname=file)
+        os.remove(os.path.join(sPath, file))
   
   return Response(status_code=201)
 
